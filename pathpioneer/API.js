@@ -38,7 +38,7 @@ export async function getRoute() {
     })
     .then((result) => result.json())
     .then((data) => console.log(data.routes[0]));
-  }
+}
 
 export async function getLonLat() {
     // Default options are marked with *
@@ -51,4 +51,29 @@ export async function getLonLat() {
     })
     .then((result) => result.json())
     .then((data) => console.log(data));
-  }
+}
+
+  export async function getDistanceMatrix() {
+    const url = 'https://maps.googleapis.com/maps/api/distancematrix/json';
+    const params = {
+        destinations: 'New York City, NY',
+        origins: 'Washington, DC|Boston',
+        units: 'imperial',
+        key: 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc'
+    };
+
+    // Construct the full URL with parameters
+    const queryString = new URLSearchParams(params).toString();
+    const fullUrl = `${url}?${queryString}`;
+
+    try {
+        const response = await fetch(fullUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(data.rows[0].elements[0]) // This will be the JSON response
+    } catch (error) {
+        console.error('Error fetching distance matrix:', error);
+    }
+}
