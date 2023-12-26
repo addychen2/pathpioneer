@@ -1,11 +1,20 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import MapView from 'react-native-maps';
+import { StyleSheet, View } from 'react-native';
+import { PROVIDER_GOOGLE } from 'react-native-maps';
+import {Marker} from 'react-native-maps';
+
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start safddddss on your app!</Text>
-      <StatusBar style="auto" />
+      <MapView style={styles.map} provider={PROVIDER_GOOGLE}>
+      <Marker
+        coordinate={{latitude: -34.397, longitude: 150.644}}
+        title='bing bang'
+        description='bingyee bangeee'
+    />
+  </MapView>
     </View>
   );
 }
@@ -13,8 +22,9 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  map: {
+    width: '100%',
+    height: '100%',
   },
 });
