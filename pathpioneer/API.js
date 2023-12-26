@@ -37,5 +37,18 @@ export async function getRoute() {
   "units": "IMPERIAL"}), // body data type must match "Content-Type" header
     })
     .then((result) => result.json())
-    .then((data) => console.log(data.routes[0].distanceMeters));
+    .then((data) => console.log(data.routes[0]));
+  }
+
+export async function getLonLat() {
+    // Default options are marked with *
+    const response = await fetch('https://maps.googleapis.com/maps/api/geocode/json?place_id=ChIJeRpOeF67j4AR9ydy_PIzPuM&key=AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc', {
+        headers: {
+            "Content-Type": "application/json"
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        method: "GET", // *GET, POST, PUT, DELETE, etc.
+    })
+    .then((result) => result.json())
+    .then((data) => console.log(data));
   }
