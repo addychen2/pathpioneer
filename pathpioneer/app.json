@@ -15,7 +15,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.addychen2.pathpioneer",
+      "config": {
+        "googleMapsApiKey": "AIzaSyCpH9LyMFm4FuF94_cVINcvR3nGOq3s3vs"
+      }
     },
     "android": {
       "adaptiveIcon": {
