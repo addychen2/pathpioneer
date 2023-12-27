@@ -1,3 +1,5 @@
+const API_KEY = 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc'
+
 export async function getRoute() {
     // Default options are marked with *
     const response = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
@@ -5,7 +7,7 @@ export async function getRoute() {
       headers: {
         "Content-Type": "application/json",
         // 'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Goog-Api-Key': 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc',
+        'X-Goog-Api-Key': API_KEY,
         'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'
       },
       body: JSON.stringify({"origin":{
@@ -42,7 +44,7 @@ export async function getRoute() {
 
 export async function getLonLat() {
     // Default options are marked with *
-    const response = await fetch('https://maps.googleapis.com/maps/api/geocode/json?place_id=ChIJeRpOeF67j4AR9ydy_PIzPuM&key=AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc', {
+    const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?place_id=ChIJeRpOeF67j4AR9ydy_PIzPuM&key=${API_KEY}`, {
         headers: {
             "Content-Type": "application/json"
             // 'Content-Type': 'application/x-www-form-urlencoded',
@@ -59,7 +61,7 @@ export async function getLonLat() {
         destinations: 'New York City, NY',
         origins: 'Washington, DC|Boston',
         units: 'imperial',
-        key: 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc'
+        key: API_KEY
     };
 
     // Construct the full URL with parameters

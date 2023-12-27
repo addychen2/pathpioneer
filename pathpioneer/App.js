@@ -10,8 +10,8 @@ import { getDistanceMatrix } from './API';
 
 export default function App() {
   getDistanceMatrix()
-  //getRoute()
-  //getLonLat()
+  getRoute()
+  getLonLat()
   return (
     <View style={styles.container}>
       <MapView style={styles.map} provider={PROVIDER_GOOGLE}>
