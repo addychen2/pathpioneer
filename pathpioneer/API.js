@@ -55,12 +55,12 @@ export async function getLonLat() {
     .then((data) => console.log(data));
 }
 
-  export async function getDistanceMatrix() {
+export async function getDistanceMatrix(destination, origin, unit) {
     const url = 'https://maps.googleapis.com/maps/api/distancematrix/json';
     const params = {
-        destinations: 'New York City, NY',
-        origins: 'Washington, DC|Boston',
-        units: 'imperial',
+        destinations: destination,
+        origins: origin,
+        units: unit,
         key: API_KEY
     };
 
@@ -74,8 +74,17 @@ export async function getLonLat() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log(data.rows[0].elements[0]) // This will be the JSON response
+        //console.log(data)
+        return data
+        // This will be the JSON response
     } catch (error) {
         console.error('Error fetching distance matrix:', error);
     }
+}
+
+export async function getFlask() {
+    // Default options are marked with *
+    const response = await fetch(`https://flask-service.mtnnq6rll7a5u.us-east-2.cs.amazonlightsail.com/`)
+    .then((result) => result.json())
+    .then((data) => console.log(data));
 }
