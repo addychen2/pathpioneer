@@ -1,14 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import MapView from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
 import { PROVIDER_GOOGLE } from 'react-native-maps';
 import {Marker} from 'react-native-maps';
 import { getRoute } from './API';
+
 import { Polyline } from 'react-native-maps';
+
+import { getLonLat } from './API';
+import { getDistanceMatrix } from './API';
+import { getFlask } from './API';
+
+var distMatrix;
+
+async function getMatrix(destination, origin, unit){
+  distMatrix = await getDistanceMatrix(destination, origin, unit)
+  console.log("inside matric funxtion")
+  console.log(distMatrix);
+}
+
+
 
 
 export default function App() {
-  getRoute()
+
+  getFlask()
+  //getRoute()
+  //getLonLat()
   return (
     <View style={styles.container}>
       <MapView style={styles.map} provider={PROVIDER_GOOGLE}>
