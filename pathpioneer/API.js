@@ -1,4 +1,5 @@
 const API_KEY = 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc'
+const AWS_LIGHTSAIL_ADDRESS = 'https://flask-service-2.mtnnq6rll7a5u.us-east-2.cs.amazonlightsail.com/'
 
 export async function getRoute() {
     // Default options are marked with *
@@ -100,7 +101,7 @@ export async function getDistanceMatrix(destination, origin, unit) {
 
 export async function getFlask() {
     // Default options are marked with *
-    const response = await fetch(`https://flask-service.mtnnq6rll7a5u.us-east-2.cs.amazonlightsail.com/`)
+    const response = await fetch(AWS_LIGHTSAIL_ADDRESS)
     .then((result) => result.json())
     .then((data) => console.log(data));
 }
