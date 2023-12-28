@@ -52,7 +52,8 @@ export async function sendAddress(){
         {
         "hierarchy": [["addresses in hierarchy 1", "address 2 in hierarchy 1"], ["addresses in hierarchy 2......", "address 2 in hierarchy 2"], ["etc...."]] // hierarchy corresponds to index in array
       }), // body data type must match "Content-Type" header
-
+    })
+      .then((result) => result.json())
     .then((data) => console.log(data.routes[0]));
 }
 
