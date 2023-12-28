@@ -37,5 +37,20 @@ export async function getRoute() {
   "units": "IMPERIAL"}), // body data type must match "Content-Type" header
     })
     .then((result) => result.json())
-    .then((data) => console.log(data.routes[0].distanceMeters));
+    .then((data) => console.log(data.routes[0].polyline));
   }
+
+export async function sendAddress(){
+  const response = await fetch('https://127.0.0.1/whatever', {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(
+        {
+        "hierarchy": [["addresses in hierarchy 1", "address 2 in hierarchy 1"], ["addresses in hierarchy 2......", "address 2 in hierarchy 2"], ["etc...."]] // hierarchy corresponds to index in array
+      }), // body data type must match "Content-Type" header
+    })
+    .then((result) => result.json())
+    .then((data) => console.log(data));
+}
