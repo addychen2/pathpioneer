@@ -1,105 +1,200 @@
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
-import requests
-
-def get_distance_matrix(destination, origin, unit, API_KEY):
-    url = 'https://maps.googleapis.com/maps/api/distancematrix/json'
-    params = {
-        'destinations': destination,
-        'origins': origin,
-        'units': unit,
-        'key': API_KEY
-    }
-
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()  # Raises HTTPError for bad requests (4XX, 5XX)
-        data = response.json()
-        # print(data)
-        return data
-    except requests.exceptions.HTTPError as err:
-        print(f'HTTP error! Status: {err.response.status_code}')
-    except Exception as err:
-        print('Error fetching distance matrix:', err)
+import sys
+import json
+import urllib.request
 
 
-def create_data_model():
-    # Define your data model including the distance matrix and precedence constraints
+def create_data():
+    """Creates the data."""
     data = {}
-    data['distance_matrix'] = [
-        [0, 2451, 713, 1018, 1631, 1374, 2408, 213, 2571, 875, 1420, 2145, 1972],
-        [2451, 0, 1745, 1524, 831, 1240, 959, 2596, 403, 1589, 1374, 357, 579],
-        [713, 1745, 0, 355, 920, 803, 1737, 851, 1858, 262, 940, 1453, 1260],
-        [1018, 1524, 355, 0, 700, 862, 1395, 1123, 1584, 466, 1056, 1280, 987],
-        [1631, 831, 920, 700, 0, 663, 1021, 1769, 949, 796, 879, 586, 371],
-        [1374, 1240, 803, 862, 663, 0, 1681, 1551, 1765, 547, 225, 887, 999],
-        [2408, 959, 1737, 1395, 1021, 1681, 0, 2493, 678, 1724, 1891, 1114, 701],
-        [213, 2596, 851, 1123, 1769, 1551, 2493, 0, 2699, 1038, 1605, 2300, 2099],
-        [2571, 403, 1858, 1584, 949, 1765, 678, 2699, 0, 1744, 1645, 653, 600],
-        [875, 1589, 262, 466, 796, 547, 1724, 1038, 1744, 0, 679, 1272, 1162],
-        [1420, 1374, 940, 1056, 879, 225, 1891, 1605, 1645, 679, 0, 1017, 1200],
-        [2145, 357, 1453, 1280, 586, 887, 1114, 2300, 653, 1272, 1017, 0, 504],
-        [1972, 579, 1260, 987, 371, 999, 701, 2099, 600, 1162, 1200, 504, 0],
-    ]
-    data['num_vehicles'] = 1
-    data['depot'] = 0
-    data['precedence'] = []
+    data['API_key'] = 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc'
+    data['addresses'] = ['3610+Hacks+Cross+Rd+Memphis+TN',
+                      '1921+Elvis+Presley+Blvd+Memphis+TN',
+                      '149+Union+Avenue+Memphis+TN',
+                      '1034+Audubon+Drive+Memphis+TN',
+                      '1532+Madison+Ave+Memphis+TN',
+                      '706+Union+Ave+Memphis+TN',
+                      '3641+Central+Ave+Memphis+TN',
+                      '926+E+McLemore+Ave+Memphis+TN',
+                      '4339+Park+Ave+Memphis+TN',
+                      '600+Goodwyn+St+Memphis+TN',
+                      '2000+North+Pkwy+Memphis+TN',
+                      '262+Danny+Thomas+Pl+Memphis+TN',
+                      '125+N+Front+St+Memphis+TN',
+                      '5959+Park+Ave+Memphis+TN',
+                      '814+Scott+St+Memphis+TN',
+                      '1005+Tillman+St+Memphis+TN'
+                    ]
     return data
 
+def create_distance_matrix(data):
+    addresses = data["addresses"]
+    API_key = data["API_key"]
+    # Distance Matrix API only accepts 100 elements per request, so get rows in multiple requests.
+    max_elements = 100
+    num_addresses = len(addresses) # 16 in this example.
+    # Maximum number of rows that can be computed per request (6 in this example).
+    max_rows = max_elements // num_addresses
+    #print()
+    #print(max_elements // num_addresses)
+    #print()
+    # num_addresses = q * max_rows + r (q = 2 and r = 4 in this example).
+    q, r = divmod(num_addresses, max_rows)
+    dest_addresses = addresses
+    distance_matrix = []
+    # Send q requests, returning max_rows rows per request.
+    for i in range(q):
+        origin_addresses = addresses[i * max_rows: (i + 1) * max_rows]
+        response = send_request(origin_addresses, dest_addresses, API_key)
+        distance_matrix += build_distance_matrix(response)
+
+    # Get the remaining remaining r rows, if necessary.
+    if r > 0:
+        origin_addresses = addresses[q * max_rows: q * max_rows + r]
+        response = send_request(origin_addresses, dest_addresses, API_key)
+        distance_matrix += build_distance_matrix(response)
+    print(distance_matrix)
+    return distance_matrix
+
+def send_request(origin_addresses, dest_addresses, API_key):
+    """ Build and send request for the given origin and destination addresses."""
+    def build_address_str(addresses):
+        # Build a pipe-separated string of addresses
+        address_str = ''
+        for i in range(len(addresses) - 1):
+            address_str += addresses[i] + '|'
+            address_str += addresses[-1]
+        return address_str
+
+    request = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial'
+    origin_address_str = build_address_str(origin_addresses)
+    dest_address_str = build_address_str(dest_addresses)
+    request = request + '&origins=' + origin_address_str + '&destinations=' + \
+                        dest_address_str + '&key=' + API_key
+    with urllib.request.urlopen(request) as response:
+        jsonResult = response.read()
+        responseData = json.loads(jsonResult.decode('utf-8'))
+        #print()
+        #print(jsonResult)
+        #print(responseData)
+        #print()
+    #return jsonResult
+    return responseData
+
+def build_distance_matrix(response):
+    distance_matrix = []
+    for row in response['rows']:
+        row_list = [row['elements'][j]['distance']['value'] for j in range(len(row['elements']))]
+        distance_matrix.append(row_list)
+    
+    #print(distance_matrix)
+    return distance_matrix
+
+
+def create_data_model(addresses_hierarchy, API_key):
+    data = {}
+    data['addresses'] = addresses_hierarchy
+    #data['addresses'] = [element for row in addresses_hierarchy for element in row]
+    data['API_key'] = API_key
+    """Stores the data for the problem."""
+    data_model = {}
+    data_model["distance_matrix"] = create_distance_matrix(data)
+    data_model["pickups_deliveries"] = [
+        #[0, 15]
+    ]
+    data_model["num_vehicles"] = 1
+    data_model["starts"] = [0]
+    data_model["ends"] = [len(addresses_hierarchy) - 1]
+    return data_model
+
+
+def print_solution(data_model, manager, routing, solution):
+    """Prints solution on console."""
+    print(f"Objective: {solution.ObjectiveValue()}")
+    total_distance = 0
+    for vehicle_id in range(data_model["num_vehicles"]):
+        index = routing.Start(vehicle_id)
+        plan_output = f"Route for vehicle {vehicle_id}:\n"
+        route_distance = 0
+        while not routing.IsEnd(index):
+            plan_output += f" {manager.IndexToNode(index)} -> "
+            previous_index = index
+            index = solution.Value(routing.NextVar(index))
+            route_distance += routing.GetArcCostForVehicle(
+                previous_index, index, vehicle_id
+            )
+        plan_output += f"{manager.IndexToNode(index)}\n"
+        plan_output += f"Distance of the route: {route_distance}m\n"
+        print(plan_output)
+        total_distance += route_distance
+    print(f"Total Distance of all routes: {total_distance}m")
+
+
 def main():
+    """Entry point of the program."""
     # Instantiate the data problem.
-    data = create_data_model()
+    data = create_data()
+    data_model = create_data_model(data["addresses"], data["API_key"])
 
     # Create the routing index manager.
-    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),
-                                           data['num_vehicles'], data['depot'])
+    manager = pywrapcp.RoutingIndexManager(
+        len(data_model["distance_matrix"]), data_model["num_vehicles"], data_model["starts"], data_model["ends"]
+    )
 
     # Create Routing Model.
     routing = pywrapcp.RoutingModel(manager)
 
-    # Create and register a transit callback.
-    def distance_callback(from_index, to_index):
-        # Returns the distance between the two nodes.
-        from_node = manager.IndexToNode(from_index)
-        to_node = manager.IndexToNode(to_index)
-        return data['distance_matrix'][from_node][to_node]
-
-    transit_callback_index = routing.RegisterTransitCallback(distance_callback)
 
     # Define cost of each arc.
+    def distance_callback(from_index, to_index):
+        """Returns the manhattan distance between the two nodes."""
+        # Convert from routing variable Index to distance matrix NodeIndex.
+        from_node = manager.IndexToNode(from_index)
+        to_node = manager.IndexToNode(to_index)
+        return data_model["distance_matrix"][from_node][to_node]
+
+    transit_callback_index = routing.RegisterTransitCallback(distance_callback)
     routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
-    # Add Precedence constraints
-    for prec in data['precedence']:
+    # Add Distance constraint.
+    dimension_name = "Distance"
+    routing.AddDimension(
+        transit_callback_index,
+        0,  # no slack
+        sys.maxsize,  # vehicle maximum travel distance
+        True,  # start cumul to zero
+        dimension_name,
+    )
+    distance_dimension = routing.GetDimensionOrDie(dimension_name)
+    distance_dimension.SetGlobalSpanCostCoefficient(100)
+
+    # Define Transportation Requests.
+    for request in data_model["pickups_deliveries"]:
+        pickup_index = manager.NodeToIndex(request[0])
+        delivery_index = manager.NodeToIndex(request[1])
+        routing.AddPickupAndDelivery(pickup_index, delivery_index)
         routing.solver().Add(
-            routing.CumulVar(manager.NodeToIndex(prec[0])) <= 
-            routing.CumulVar(manager.NodeToIndex(prec[1])))
+            routing.VehicleVar(pickup_index) == routing.VehicleVar(delivery_index)
+        )
+        routing.solver().Add(
+            distance_dimension.CumulVar(pickup_index)
+            <= distance_dimension.CumulVar(delivery_index)
+        )
 
     # Setting first solution heuristic.
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     search_parameters.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+        routing_enums_pb2.FirstSolutionStrategy.PARALLEL_CHEAPEST_INSERTION
+    )
 
     # Solve the problem.
     solution = routing.SolveWithParameters(search_parameters)
 
     # Print solution on console.
     if solution:
-        print_solution(manager, routing, solution)
+        print_solution(data_model, manager, routing, solution)
 
-def print_solution(manager, routing, solution):
-    # Function to print the solution.
-    index = routing.Start(0)
-    plan_output = 'Route for vehicle 0:\n'
-    route_distance = 0
-    while not routing.IsEnd(index):
-        plan_output += ' {} ->'.format(manager.IndexToNode(index))
-        previous_index = index
-        index = solution.Value(routing.NextVar(index))
-        route_distance += routing.GetArcCostForVehicle(previous_index, index, 0)
-    plan_output += ' {}\n'.format(manager.IndexToNode(index))
-    print(plan_output)
-    print('Route distance: {}miles\n'.format(route_distance))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
