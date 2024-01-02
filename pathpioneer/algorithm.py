@@ -5,17 +5,17 @@ import json
 import urllib.request
 
 
-def create_data():
+def get_data():
     """Creates the data."""
     data = {}
     data['API_key'] = 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc'
-    data['addresses'] = ['3610+Hacks+Cross+Rd+Memphis+TN',
-                        '1921+Elvis+Presley+Blvd+Memphis+TN',
+    data['addresses'] = [['3610+Hacks+Cross+Rd+Memphis+TN'],
+                        ['1921+Elvis+Presley+Blvd+Memphis+TN',
                         '149+Union+Avenue+Memphis+TN',
                         '1034+Audubon+Drive+Memphis+TN',
                         '1532+Madison+Ave+Memphis+TN',
-                        '706+Union+Ave+Memphis+TN',
-                        '3641+Central+Ave+Memphis+TN',
+                        '706+Union+Ave+Memphis+TN'],
+                        ['3641+Central+Ave+Memphis+TN',
                         '926+E+McLemore+Ave+Memphis+TN',
                         '4339+Park+Ave+Memphis+TN',
                         '600+Goodwyn+St+Memphis+TN',
@@ -23,8 +23,8 @@ def create_data():
                         '262+Danny+Thomas+Pl+Memphis+TN',
                         '125+N+Front+St+Memphis+TN',
                         '5959+Park+Ave+Memphis+TN',
-                        '814+Scott+St+Memphis+TN',
-                        '1005+Tillman+St+Memphis+TN'
+                        '814+Scott+St+Memphis+TN'],
+                        ['1005+Tillman+St+Memphis+TN']
                         ]
 
 
@@ -38,15 +38,9 @@ def create_distance_matrix(data):
     num_addresses = len(addresses) # 16 in this example.
     # Maximum number of rows that can be computed per request (6 in this example).
     max_rows = max_elements // num_addresses
-    #print()
-    #print(max_elements // num_addresses)
-    #print()
     # num_addresses = q * max_rows + r (q = 2 and r = 4 in this example).
     q, r = divmod(num_addresses, max_rows)
     dest_addresses = addresses 
-    #print(r)
-    #print()
-    #print(q)
     distance_matrix = []
     # Send q requests, returning max_rows rows per request.
     for i in range(q):
@@ -81,11 +75,6 @@ def send_request(origin_addresses, dest_addresses, API_key):
     with urllib.request.urlopen(request) as response:
         jsonResult = response.read()
         responseData = json.loads(jsonResult.decode('utf-8'))
-        #print()
-        #print(jsonResult)
-        #print(responseData)
-        #print()
-    #return jsonResult
     return responseData
 
 def build_distance_matrix(response):
@@ -93,28 +82,53 @@ def build_distance_matrix(response):
     for row in response['rows']:
         row_list = [row['elements'][j]['distance']['value'] for j in range(len(row['elements']))]
         distance_matrix.append(row_list)
-    
-    #print(distance_matrix)
     return distance_matrix
-
 
 def create_data_model(addresses_hierarchy, API_key):
     data = {}
-    data['addresses'] = addresses_hierarchy
-    #data['addresses'] = [element for row in addresses_hierarchy for element in row]
-    #array_1d = [element for row in array_2d for element in row]
+    data['addresses'] = addresses_assemble(addresses_hierarchy)
     data['API_key'] = API_key
     """Stores the data for the problem."""
     data_model = {}
     data_model["distance_matrix"] = create_distance_matrix(data)
-    data_model["pickups_deliveries"] = [
-        #[0, 15]
-    ]
+    addresses_no_start_end = addresses_hierarchy[1:-1]
+    addresses_hierarchy_index = create_index(addresses_no_start_end)
+    data_model["pickups_deliveries"] = generate_relationships(addresses_hierarchy_index)
     data_model["num_vehicles"] = 1
     data_model["starts"] = [0]
-    data_model["ends"] = [len(addresses_hierarchy) - 1]
+    data_model["ends"] = [len(data['addresses']) - 1]
     return data_model
 
+def addresses_assemble(two_d_array):
+    return [element for row in two_d_array for element in row]
+
+def create_index(matrix):
+    flattened_index = 0
+    result_matrix = []
+
+    for row in matrix:
+        result_row = []
+        for _ in row:
+            result_row.append(flattened_index)
+            flattened_index += 1
+        result_matrix.append(result_row)
+
+    return result_matrix
+
+def generate_relationships(hierarchy):
+    relationships = []
+
+    # Iterate over the hierarchy, except the last group
+    for i in range(len(hierarchy) - 1):
+        current_group = hierarchy[i]
+        next_group = hierarchy[i + 1]
+
+        # Create pairs representing 'greater than' relationships
+        for element in current_group:
+            for next_element in next_group:
+                relationships.append([element + 1, next_element + 1])
+
+    return relationships
 
 def print_solution(data_model, manager, routing, solution):
     """Prints solution on console."""
@@ -141,7 +155,7 @@ def print_solution(data_model, manager, routing, solution):
 def main():
     """Entry point of the program."""
     # Instantiate the data problem.
-    data = create_data()
+    data = get_data()
     data_model = create_data_model(data["addresses"], data["API_key"])
 
     # Create the routing index manager.
@@ -197,12 +211,12 @@ def main():
 
     # Solve the problem.
     solution = routing.SolveWithParameters(search_parameters)
-
-    #print(distance_callback(1, 1))
-
+    
     # Print solution on console.
     if solution:
         print_solution(data_model, manager, routing, solution)
+    else:
+        print("There is no solution")
 
 
 if __name__ == "__main__":
