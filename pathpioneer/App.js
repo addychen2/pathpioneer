@@ -1,76 +1,49 @@
 import React, { useEffect } from 'react';
-import MapView from 'react-native-maps';
-import { StyleSheet, View } from 'react-native';
-import { PROVIDER_GOOGLE } from 'react-native-maps';
-import {Marker} from 'react-native-maps';
-import { getRoute } from './API';
+import Map from './paths/map';
+import Prompt from './paths/prompt';
+import 'react-native-gesture-handler';
+import { NavigationContainer } from '@react-navigation/native';
 
-import { Polyline } from 'react-native-maps';
-
-import { getLonLat } from './API';
-import { getDistanceMatrix } from './API';
-import { getFlask } from './API';
-
-var distMatrix;
-
-async function getMatrix(destination, origin, unit){
-  distMatrix = await getDistanceMatrix(destination, origin, unit)
-  console.log("inside matric funxtion")
-  console.log(distMatrix);
-}
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 
+const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
+
+// You can import Ionicons from @expo/vector-icons/Ionicons if you use Expo or
+// react-native-vector-icons/Ionicons otherwise.
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+// (...)
 
 export default function App() {
-
-  getFlask()
-  //getRoute()
-  //getLonLat()
   return (
-    <View style={styles.container}>
-      <MapView style={styles.map} provider={PROVIDER_GOOGLE}>
-      <Polyline
-    coordinates={[
-      {latitude: 37.8025259, longitude: -122.4351431},
-      {latitude: 37.7896386, longitude: -122.421646},
-      {latitude: 37.7665248, longitude: -122.4161628},
-      {latitude: 37.7734153, longitude: -122.4577787},
-      {latitude: 37.7948605, longitude: -122.4596065},
-      {latitude: 37.8025259, longitude: -122.4351431},
-    ]}
-    strokeColor="#000" // fallback for when `strokeColors` is not supported by the map-provider
-    strokeColors={[
-      '#7F0000',
-      '#00000000', // no color, creates a "long" gradient between the previous and next coordinate
-      '#B24112',
-      '#E5845C',
-      '#238C23',
-      '#7F0000',
-    ]}
-    strokeWidth={6}
-  />
-      <Marker
-        coordinate={{latitude: 37.8025259, longitude: -122.4351431}}
-        title='bing bang'
-        description='bingyee bangeee'
-    />
-    <Marker
-        coordinate={{latitude: 37.7896386, longitude: -122.421646}}
-        title='bing bang'
-        description='bingyee bangeee'
-    />
-  </MapView>
-    </View>
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+
+            if (route.name === 'Home') {
+              iconName = focused
+                ? 'ios-information-circle'
+                : 'ios-information-circle-outline';
+            } else if (route.name === 'Settings') {
+              iconName = focused ? 'ios-list' : 'ios-list-outline';
+            }
+
+            // You can return any component that you like here!
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: 'tomato',
+          tabBarInactiveTintColor: 'gray',
+        })}
+      >
+        <Tab.Screen name="Prompt" component={Prompt} />
+        <Tab.Screen name="Map" component={Map} />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    width: '100%',
-    height: '100%',
-  },
-});
