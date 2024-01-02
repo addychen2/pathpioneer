@@ -10,22 +10,24 @@ def create_data():
     data = {}
     data['API_key'] = 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc'
     data['addresses'] = ['3610+Hacks+Cross+Rd+Memphis+TN',
-                      '1921+Elvis+Presley+Blvd+Memphis+TN',
-                      '149+Union+Avenue+Memphis+TN',
-                      '1034+Audubon+Drive+Memphis+TN',
-                      '1532+Madison+Ave+Memphis+TN',
-                      '706+Union+Ave+Memphis+TN',
-                      '3641+Central+Ave+Memphis+TN',
-                      '926+E+McLemore+Ave+Memphis+TN',
-                      '4339+Park+Ave+Memphis+TN',
-                      '600+Goodwyn+St+Memphis+TN',
-                      '2000+North+Pkwy+Memphis+TN',
-                      '262+Danny+Thomas+Pl+Memphis+TN',
-                      '125+N+Front+St+Memphis+TN',
-                      '5959+Park+Ave+Memphis+TN',
-                      '814+Scott+St+Memphis+TN',
-                      '1005+Tillman+St+Memphis+TN'
-                    ]
+                        '1921+Elvis+Presley+Blvd+Memphis+TN',
+                        '149+Union+Avenue+Memphis+TN',
+                        '1034+Audubon+Drive+Memphis+TN',
+                        '1532+Madison+Ave+Memphis+TN',
+                        '706+Union+Ave+Memphis+TN',
+                        '3641+Central+Ave+Memphis+TN',
+                        '926+E+McLemore+Ave+Memphis+TN',
+                        '4339+Park+Ave+Memphis+TN',
+                        '600+Goodwyn+St+Memphis+TN',
+                        '2000+North+Pkwy+Memphis+TN',
+                        '262+Danny+Thomas+Pl+Memphis+TN',
+                        '125+N+Front+St+Memphis+TN',
+                        '5959+Park+Ave+Memphis+TN',
+                        '814+Scott+St+Memphis+TN',
+                        '1005+Tillman+St+Memphis+TN'
+                        ]
+
+
     return data
 
 def create_distance_matrix(data):
@@ -41,7 +43,10 @@ def create_distance_matrix(data):
     #print()
     # num_addresses = q * max_rows + r (q = 2 and r = 4 in this example).
     q, r = divmod(num_addresses, max_rows)
-    dest_addresses = addresses
+    dest_addresses = addresses 
+    #print(r)
+    #print()
+    #print(q)
     distance_matrix = []
     # Send q requests, returning max_rows rows per request.
     for i in range(q):
@@ -54,7 +59,7 @@ def create_distance_matrix(data):
         origin_addresses = addresses[q * max_rows: q * max_rows + r]
         response = send_request(origin_addresses, dest_addresses, API_key)
         distance_matrix += build_distance_matrix(response)
-    print(distance_matrix)
+    #print(distance_matrix)
     return distance_matrix
 
 def send_request(origin_addresses, dest_addresses, API_key):
@@ -62,13 +67,14 @@ def send_request(origin_addresses, dest_addresses, API_key):
     def build_address_str(addresses):
         # Build a pipe-separated string of addresses
         address_str = ''
-        for i in range(len(addresses) - 1):
+        for i in range(len(addresses)):
             address_str += addresses[i] + '|'
-            address_str += addresses[-1]
+            #address_str += addresses[-1]
         return address_str
 
     request = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial'
     origin_address_str = build_address_str(origin_addresses)
+    #print(origin_address_str)
     dest_address_str = build_address_str(dest_addresses)
     request = request + '&origins=' + origin_address_str + '&destinations=' + \
                         dest_address_str + '&key=' + API_key
@@ -96,6 +102,7 @@ def create_data_model(addresses_hierarchy, API_key):
     data = {}
     data['addresses'] = addresses_hierarchy
     #data['addresses'] = [element for row in addresses_hierarchy for element in row]
+    #array_1d = [element for row in array_2d for element in row]
     data['API_key'] = API_key
     """Stores the data for the problem."""
     data_model = {}
@@ -190,6 +197,8 @@ def main():
 
     # Solve the problem.
     solution = routing.SolveWithParameters(search_parameters)
+
+    #print(distance_callback(1, 1))
 
     # Print solution on console.
     if solution:
