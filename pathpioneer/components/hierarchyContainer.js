@@ -6,7 +6,7 @@ import { FlatList } from 'react-native';
 import { StyleSheet } from 'react-native';
 import { Text } from 'react-native';
 
-
+const globalArray = [];
 let nextId = 0;
 export default function HierarchyConatiner(){
     const [addresses, setAddresses] = useState([]);
@@ -16,6 +16,7 @@ export default function HierarchyConatiner(){
             [ // with a new array
                 ...addresses, // that contains all the old items
                 { id: nextId++ } // and one new item at the end
+
             ]
         )
     }
@@ -49,3 +50,5 @@ const styles = StyleSheet.create({
         color: 'white',
       },
   });
+
+export {globalArray};

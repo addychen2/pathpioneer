@@ -1,12 +1,19 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet, TextInput} from 'react-native';
 import Button from './button';
+import { globalArray } from './hierarchyContainer';
 
-const AddressInput = () => {
+const AddressInput = (props) => {
   const [streetAddress, onChangeStreetAddress] = React.useState('');
   const [city, onChangeCity] = React.useState('');
   const [state, onChangeState] = React.useState('')
   const [number, onChangeNumber] = React.useState('');
+
+  const addToArray = () => {
+    globalArray[this.props.hierarchy].push(streetAddress + ", " + city + ", " + state + ", " + number);
+  }
+ 
+  console.log(globalArray);
 
   return (
     <SafeAreaView>
@@ -35,7 +42,7 @@ const AddressInput = () => {
         placeholder="Zipcode"
         keyboardType="numeric"
       />
-      <Button title = "save" />
+      <Button onPress={addToArray} title="save"/>
     </SafeAreaView>
   );
 };
