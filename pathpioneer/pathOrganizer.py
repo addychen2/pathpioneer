@@ -1,9 +1,18 @@
+'''
+    0. receive the data:
+    1. make a 1 d array from the 2 d array
+    2. make a 2 d index array from the 2 d array
+    3. make a distance matrix
+    4. compute the shoetest distance between every adjacent hierarchy
+    5. send these as start ends to the algorithm class to calculate the path in every hierarchy (send over as addresses)
+    6. recieve these (as addresses) and compile into one path
+    7. respond back to the api call
+'''
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 import sys
 import json
 import urllib.request
-
 
 def get_data():
     """Creates the data."""
@@ -42,7 +51,6 @@ def create_distance_matrix(data):
         origin_addresses = addresses[q * max_rows: q * max_rows + r]
         response = send_request(origin_addresses, dest_addresses, API_key)
         distance_matrix += build_distance_matrix(response)
-    print(distance_matrix)
     return distance_matrix
 
 def send_request(origin_addresses, dest_addresses, API_key):
@@ -73,23 +81,39 @@ def build_distance_matrix(response):
         distance_matrix.append(row_list)
     return distance_matrix
 
-def create_data_model(addresses_hierarchy, API_key):
+def create_data_model1(addresses_hierarchy, API_key):
     data = {}
     data['addresses'] = addresses_assemble(addresses_hierarchy)
     data['API_key'] = API_key
     """Stores the data for the problem."""
     data_model = {}
     data_model["distance_matrix"] = create_distance_matrix(data)
-    addresses_no_start_end = addresses_hierarchy[1:-1]
-    addresses_hierarchy_index = create_index(addresses_no_start_end)
-    data_model["pickups_deliveries"] = generate_relationships(addresses_hierarchy_index)
-    print()
-    print(data_model["pickups_deliveries"])
-    print()
-    data_model["num_vehicles"] = 1
-    data_model["starts"] = [0]
-    data_model["ends"] = [len(data['addresses']) - 1]
+    addresses_hierarchy_index = create_index(addresses_hierarchy)
+    addresses_no_start_end = addresses_hierarchy_index[1:-1]
+    data_model["start_end"] = []
+    for i in range(len(addresses_no_start_end) - 1):
+        start = addresses_no_start_end[i]
+        end = addresses_no_start_end[i + 1]
+        data_model["start_end"].append(get_start_end(start, end, data_model["distance_matrix"]))
+    data_model["start_end_addresses"] = []
+    for index_tuple in data_model["start_end"]:
+        start, end = index_tuple
+        data_model["start_end_addresses"].append((data['addresses'][start], data['addresses'][end]))
+    addresses_hierarchy_index = create_index(addresses_hierarchy)
+
     return data_model
+
+def get_start_end(start, end, distance_matrix):
+    min_value = float('inf')
+    min_position = (-1, -1)
+
+    for row in start:
+        for col in end:
+            if distance_matrix[row][col] < min_value:
+                min_value = distance_matrix[row][col]
+                min_position = (row, col)
+
+    return min_position
 
 def addresses_assemble(two_d_array):
     return [element for row in two_d_array for element in row]
@@ -107,20 +131,17 @@ def create_index(matrix):
 
     return result_matrix
 
-def generate_relationships(hierarchy):
-    relationships = []
-
-    # Iterate over the hierarchy, except the last group
-    for i in range(len(hierarchy) - 1):
-        current_group = hierarchy[i]
-        next_group = hierarchy[i + 1]
-
-        # Create pairs representing 'greater than' relationships
-        for element in current_group:
-            for next_element in next_group:
-                relationships.append([element + 1, next_element + 1])
-
-    return relationships
+def create_data_model(addresses, API_key):
+    data = {}
+    data['addresses'] = addresses
+    data['API_key'] = API_key
+    """Stores the data for the problem."""
+    data_model = {}
+    data_model["distance_matrix"] = create_distance_matrix(data)
+    data_model["num_vehicles"] = 1
+    data_model["starts"] = [0]
+    data_model["ends"] = [len(data['addresses']) - 1]
+    return data_model
 
 def print_solution(data_model, manager, routing, solution):
     """Prints solution on console."""
@@ -143,11 +164,10 @@ def print_solution(data_model, manager, routing, solution):
         total_distance += route_distance
     print(f"Total Distance of all routes: {total_distance}m")
 
-
-def main():
+def solver():
     """Entry point of the program."""
     # Instantiate the data problem.
-    data = get_data()
+    data = create_data()
     data_model = create_data_model(data["addresses"], data["API_key"])
 
     # Create the routing index manager.
@@ -157,7 +177,6 @@ def main():
 
     # Create Routing Model.
     routing = pywrapcp.RoutingModel(manager)
-
 
     # Define cost of each arc.
     def distance_callback(from_index, to_index):
@@ -182,19 +201,6 @@ def main():
     distance_dimension = routing.GetDimensionOrDie(dimension_name)
     distance_dimension.SetGlobalSpanCostCoefficient(100)
 
-    # Define Transportation Requests.
-    for request in data_model["pickups_deliveries"]:
-        pickup_index = manager.NodeToIndex(request[0])
-        delivery_index = manager.NodeToIndex(request[1])
-        routing.AddPickupAndDelivery(pickup_index, delivery_index)
-        routing.solver().Add(
-            routing.VehicleVar(pickup_index) == routing.VehicleVar(delivery_index)
-        )
-        routing.solver().Add(
-            distance_dimension.CumulVar(pickup_index)
-            <= distance_dimension.CumulVar(delivery_index)
-        )
-
     # Setting first solution heuristic.
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     search_parameters.first_solution_strategy = (
@@ -209,6 +215,21 @@ def main():
         print_solution(data_model, manager, routing, solution)
     else:
         print("There is no solution")
+
+def main():
+    """Entry point of the program."""
+    # Instantiate the data problem.
+    data = get_data()
+    data_model = create_data_model1(data["addresses"], data["API_key"])
+
+    # Create the routing index manager.
+    def distance_callback(from_index, to_index):
+        """Returns the manhattan distance between the two nodes."""
+        # Convert from routing variable Index to distance matrix NodeIndex.
+        from_node = manager.IndexToNode(from_index)
+        to_node = manager.IndexToNode(to_index)
+        return data_model["distance_matrix"][from_node][to_node]
+    
 
 
 if __name__ == "__main__":
