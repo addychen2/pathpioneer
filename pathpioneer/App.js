@@ -15,10 +15,12 @@ const Tab = createBottomTabNavigator();
 // You can import Ionicons from @expo/vector-icons/Ionicons if you use Expo or
 // react-native-vector-icons/Ionicons otherwise.
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { getRoute } from './API';
 
 // (...)
 
 export default function App() {
+  getRoute();
   return (
     <NavigationContainer>
       <Tab.Navigator
