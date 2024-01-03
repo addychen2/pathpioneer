@@ -40,7 +40,7 @@ export async function getRoute() {
   "units": "IMPERIAL"}), // body data type must match "Content-Type" header
     })
     .then((result) => result.json())
-    .then((data) => console.log(data.routes[0].polyline));
+    .then((data) => console.log(data));
   }
 
 export async function sendAddress(){
@@ -51,7 +51,7 @@ export async function sendAddress(){
       },
       body: JSON.stringify(
         {
-        "hierarchy": [["addresses in hierarchy 1", "address 2 in hierarchy 1"], ["addresses in hierarchy 2......", "address 2 in hierarchy 2"], ["etc...."]] // hierarchy corresponds to index in array
+        "hierarchy": [["starting dest"], ["addresses in hierarchy 1", "address 2 in hierarchy 1"], ["addresses in hierarchy 2......", "address 2 in hierarchy 2"], ["etc...."], ["ending dest"]] // hierarchy corresponds to index in array
       }), // body data type must match "Content-Type" header
     })
       .then((result) => result.json())
