@@ -1,3 +1,4 @@
+import { globalArray } from "./components/hierarchyContainer";
 const API_KEY = 'AIzaSyCPsqAOFiYHgfX0mKLHeOChxQkGY-03JWc'
 const AWS_LIGHTSAIL_ADDRESS = 'https://flask-service-2.mtnnq6rll7a5u.us-east-2.cs.amazonlightsail.com/'
 
@@ -44,14 +45,17 @@ export async function getRoute() {
   }
 
 export async function sendAddress(){
-  const response = await fetch('https://127.0.0.1/whatever', {
+  let newGlobalArray = globalArray;
+  newGlobalArray.unshift(globalArray[0][0]);
+  newGlobalArray.push(globalArray[globalArray.length-1][globalArray[globalArray.length-1].length-1]);
+  const response = await fetch(AWS_LIGHTSAIL_ADDRESS, {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(
         {
-        "hierarchy": [["starting dest"], ["addresses in hierarchy 1", "address 2 in hierarchy 1"], ["addresses in hierarchy 2......", "address 2 in hierarchy 2"], ["etc...."], ["ending dest"]] // hierarchy corresponds to index in array
+        "hierarchy": newGlobalArray // hierarchy corresponds to index in array
       }), // body data type must match "Content-Type" header
     })
       .then((result) => result.json())
