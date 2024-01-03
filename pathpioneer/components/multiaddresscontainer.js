@@ -1,29 +1,32 @@
 import React, { useState } from 'react';
 import { View, Button, StyleSheet } from 'react-native';
 import HierarchyConatiner from './hierarchyContainer'; // Import the MultiAddressInput component
-
+import { globalArray } from './hierarchyContainer';
+import { ScrollView } from 'react-native';
 let nextId = 0;
 
 export function MultiAddressContainer() {
-    const [containers, setContainers] = useState([{ id: nextId++ }]);
+    const [containers, setContainers] = useState([]);
 
     const addContainer = () => {
         setContainers([...containers, { id: nextId++ }]);
+        globalArray.push([]);
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             {containers.map(container => (
                 <View key={container.id} style={styles.addressContainer}>
-                    <HierarchyConatiner/>
+                    <HierarchyConatiner hierarchy={container.id}/>
                 </View>
             ))}
-            <Button onPress={addContainer} title="Add Container" />
-        </View>
+            <Button onPress={addContainer} title="Add Hierarchy" />
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
+    
     addressContainer: {
         borderWidth: 1,
         borderColor: 'black',

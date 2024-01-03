@@ -10,13 +10,13 @@ const AddressInput = (props) => {
   const [number, onChangeNumber] = React.useState('');
 
   const addToArray = () => {
-    globalArray[this.props.hierarchy].push(streetAddress + ", " + city + ", " + state + ", " + number);
+    globalArray[props.hierarchy].push(streetAddress + ", " + city + ", " + state + ", " + number);
   }
  
   console.log(globalArray);
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       <TextInput
         style={styles.input}
         onChangeText={onChangeStreetAddress}
@@ -48,6 +48,14 @@ const AddressInput = (props) => {
 };
 
 const styles = StyleSheet.create({
+  /*
+  container:{
+    height: 50,
+    width: 100,
+    borderWidth: 1,
+    
+  },
+  */
   input: {
     height: 40,
     margin: 12,

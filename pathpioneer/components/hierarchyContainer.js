@@ -8,7 +8,7 @@ import { Text } from 'react-native';
 
 const globalArray = [];
 let nextId = 0;
-export default function HierarchyConatiner(){
+export default function HierarchyConatiner(props){
     const [addresses, setAddresses] = useState([]);
 
     const addAddress = () => {
@@ -25,7 +25,7 @@ export default function HierarchyConatiner(){
         <View>
             <FlatList
                 data={addresses}
-                renderItem={({item}) => <AddressInput/>}
+                renderItem={({item}) => <AddressInput hierarchy={props.hierarchy}/>}
             />
             <Button onPress={addAddress} title="Add Address"/>
         </View>
@@ -41,6 +41,10 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         elevation: 3,
         backgroundColor: 'black',
+      },
+      container: {
+        width: 350,
+        height: 500
       },
       text: {
         fontSize: 16,
