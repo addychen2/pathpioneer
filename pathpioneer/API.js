@@ -45,21 +45,48 @@ export async function getRoute() {
   }
 
 export async function sendAddress(){
-  let newGlobalArray = globalArray;
-  newGlobalArray.unshift(globalArray[0][0]);
-  newGlobalArray.push(globalArray[globalArray.length-1][globalArray[globalArray.length-1].length-1]);
-  const response = await fetch(AWS_LIGHTSAIL_ADDRESS, {
+  // let newGlobalArray = globalArray;
+  // newGlobalArray.unshift(globalArray[0][0]);
+  // newGlobalArray.push(globalArray[globalArray.length-1][globalArray[globalArray.length-1].length-1]);
+  const response = await fetch(AWS_LIGHTSAIL_ADDRESS + '/calculateRoute', {
       method: "POST", // *GET, POST, PUT, DELETE, etc.
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(
         {
-        "hierarchy": newGlobalArray // hierarchy corresponds to index in array
+        "API_key": API_KEY,
+        "addresses": globalArray, // hierarchy corresponds to index in array
       }), // body data type must match "Content-Type" header
     })
       .then((result) => result.json())
-    .then((data) => console.log(data.routes[0]));
+    .then((data) => console.log(data));
+}
+
+export async function testAddressPOST(){
+  const response = await fetch(AWS_LIGHTSAIL_ADDRESS + '/haha', {
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(
+      {
+      "API_key": API_KEY,
+    }), // body data type must match "Content-Type" header
+  })
+    .then((result) => result.json())
+  .then((data) => console.log(data));
+}
+
+export async function testAddressGET(){
+  const response = await fetch(AWS_LIGHTSAIL_ADDRESS + '/hehe', {
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((result) => result.json())
+  .then((data) => console.log(data));
 }
 
 export async function getLonLat() {

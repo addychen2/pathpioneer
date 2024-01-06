@@ -6,12 +6,12 @@ import HierarchyConatiner from '../components/hierarchyContainer';
 import HeirarchyInput from '../components/setHierarchy';
 import MultiAddressContainer from '../components/multiaddresscontainer';
 import { sendAddress } from '../API';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function Prompt(){
     return(
-        <View style="scrollable-con">
+        <View>
         <MultiAddressContainer/>
-        <Button onPress={sendAddress} title="Submit"/>
         </View>
     );
 }

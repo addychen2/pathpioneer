@@ -3,6 +3,9 @@ import { View, Button, StyleSheet } from 'react-native';
 import HierarchyConatiner from './hierarchyContainer'; // Import the MultiAddressInput component
 import { globalArray } from './hierarchyContainer';
 import { ScrollView } from 'react-native';
+import { sendAddress } from '../API';
+import { testAddressGET } from '../API';
+import { testAddressPOST } from '../API';
 let nextId = 0;
 
 export function MultiAddressContainer() {
@@ -21,6 +24,7 @@ export function MultiAddressContainer() {
                 </View>
             ))}
             <Button onPress={addContainer} title="Add Hierarchy" />
+            <Button onPress={sendAddress} title="Submit"/>
         </ScrollView>
     );
 }

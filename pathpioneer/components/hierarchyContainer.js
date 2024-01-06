@@ -6,7 +6,7 @@ import { FlatList } from 'react-native';
 import { StyleSheet } from 'react-native';
 import { Text } from 'react-native';
 
-const globalArray = [];
+const globalArray = "[['3610+Hacks+Cross+Rd+Memphis+TN'],['1921+Elvis+Presley+Blvd+Memphis+TN'],['1005+Tillman+St+Memphis+TN']]";
 let nextId = 0;
 export default function HierarchyConatiner(props){
     const [addresses, setAddresses] = useState([]);

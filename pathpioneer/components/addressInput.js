@@ -6,11 +6,13 @@ import { globalArray } from './hierarchyContainer';
 const AddressInput = (props) => {
   const [streetAddress, onChangeStreetAddress] = React.useState('');
   const [city, onChangeCity] = React.useState('');
-  const [state, onChangeState] = React.useState('')
+  const [state, onChangeState] = React.useState('');
   const [number, onChangeNumber] = React.useState('');
 
   const addToArray = () => {
-    globalArray[props.hierarchy].push(streetAddress + ", " + city + ", " + state + ", " + number);
+    var str = streetAddress + " " + city + " " + state;
+    var replaced = str.split(" ").join('+');
+    globalArray[props.hierarchy].push(replaced);
   }
  
   console.log(globalArray);
